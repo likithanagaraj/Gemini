@@ -1,12 +1,16 @@
 import React from 'react'
-import { Button } from "@/components/ui/button"
-
+import Home from './page/Home'
+import { BrowserRouter,Routes,Route } from 'react-router-dom'
 
 const App = () => {
   return (
-    <div>App
-    <Button variant="secondary">Hi</Button>
-    </div>
+    <BrowserRouter>
+    <Routes>
+      <Route path='/' element={<Home/>}></Route>
+      <Route path='/login' element={''}></Route>
+      <Route path='/app' element={'/'}></Route>
+    </Routes>
+    </BrowserRouter>
   )
 }
 

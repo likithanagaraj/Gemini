@@ -9,6 +9,9 @@ module.exports = {
   ],
   prefix: "",
   theme: {
+    fontFamily:{
+      'Poppins' :"Poppins" 
+    },
     container: {
       center: true,
       padding: "2rem",
@@ -18,6 +21,10 @@ module.exports = {
     },
     extend: {
       colors: {
+        background_1:"131314",
+        side_nav:"1E1F20",
+        text_color:'FFFFFF',
+        button_bg:"393B3D",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
