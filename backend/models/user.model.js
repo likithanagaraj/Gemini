@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = Schema(
   {
@@ -13,22 +14,30 @@ const userSchema = Schema(
       type: String,
       required: [true, "Password is required"],
     },
-    chats: [
+    Responses: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Chat"
+        ref: "Response",
       },
     ],
     isPremiumUser: {
       type: Boolean,
-      default: false
+      default: false,
     },
     availableTokens: {
       type: Number,
-      default: 5
-    }
+      default: 5,
+    },
   },
   { timestamps: true }
 );
+
+userSchema.pre("save", async function (next) {
+  if (this.isNew || this.isModified("password")) {
+    const saltRounds = 10;
+    this.password = await bcrypt.hash(this.password, saltRounds);
+  }
+  next();
+});
 
 export const User = model("User", userSchema);

@@ -1,9 +1,10 @@
 import { Schema, model } from "mongoose";
 
-const chatSchema = Schema({
-  email: {
+const responseSchema = Schema({
+  userId: {
     type: Schema.Types.ObjectId,
-    ref: "User"
+    ref: "User",
+    required: true
   },
   data: {
     type: String,
@@ -11,4 +12,4 @@ const chatSchema = Schema({
   }
 }, {timestampts: true})
 
-export const Chat = model("Chat", chatSchema)
+export const Response = model("Response", responseSchema)

@@ -1,77 +1,66 @@
-import express, { response } from "express";
-import { getDataFromGemini } from "../controllers/user.controller.js";
+import express from "express";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
+import { Response } from "../models/response.model.js";
+
+import {
+  checkAPIWorking,
+  checkAuthStatus,
+  generateFromAi,
+  loginUser,
+  registerUser,
+  verifyUserJWT,
+} from "../controllers/user.controller.js";
 
 const router = express.Router();
 
-const verifyToken = (token) =>{
-	const details = jwt.verify(token, process.env.JWT_SECRET_TEXT)
-	return details
-}
+router.route("/responses").get(verifyUserJWT, async (req, res) => {
+  try {
+    // await User.findById(req.userId).populate('responses').then(allResponses=>{
 
-router.route("/").get((req, res) => {
-  res.send("API working fine✅✅");
-});
+    const rawResponse = await Response.find({ userId: req.userId });
+    console.log(rawResponse);
 
-router.route("/register").post(async (req, res) => {
-
-	// const {authorization} = req.headers
-	// if(authorization){
-	// 	verifyToken(authorization.split(" ")[1])
-	// }
-
-  const { email, password } = req.body;
-  
-  console.log(email, password);
-  if (!email || !password) {
-    res
-      .status(400)
-      .json({ success: false, message: "Email or password missing in body" });
-    return;
-  }
-
-  const foundEmail = await User.findOne({email});
-
-  if (foundEmail) {
-    res.status(400).json({ success: false, message: `Email ${email} already exists`});
-    return;
-  }
-
-  const newUser = await User.create({ email, password });
-
-  const payload = {
-    email: newUser.email,
-    __id: newUser.id,
-  };
-
-  const token = jwt.sign(payload, process.env.JWT_SECRET_TEXT);
-
-  res
-    .status(201)
-    .json({
-      success: true,
-      message: `Successfully create ${email}`,
-      token: token,
+    const finalResponses = rawResponse.map((eachResponse) => {
+      return eachResponse.data;
     });
+    console.log(finalResponses);
+
+    // await Response.populate(userResponse, { path: "userId" });
+
+    return res.status(200).json({
+      success: true,
+      AllResponses: finalResponses,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
-router.route("/generate").post(async (req, res) => {
-  const { prompt } = req.body;
+router.route("/").get(checkAPIWorking);
+router.route("/auth-status").get(verifyUserJWT, checkAuthStatus);
+router.route("/register").post(registerUser);
+router.route("/login").post(loginUser);
+router.route("/generate").post(verifyUserJWT, generateFromAi);
 
-  if (!prompt) {
-    res
-      .status(400)
-      .json({
-        success: false,
-        message: "Prompt required to generate response",
-      });
-    return;
+router.route("/upgrade").post(verifyUserJWT, (req, res)=>{
+
+
+  let isPaymentDone = true
+  // Put your logic to verify that payment is done then this will proceed
+  if(!isPaymentDone){
+    // write the logic
+    return
   }
 
-  const response = await getDataFromGemini(prompt);
+  const updateUser = User.findByIdAndUpdate(req.userId, {
+    $inc:{ availableTokens: +20 },
+    // isPremium: true
+  })
+  
+  console.log(updateUser)
 
-  res.status(200).json({ success: true, AIResponse: response });
 });
+
 
 export default router;
